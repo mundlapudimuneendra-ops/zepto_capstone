@@ -195,6 +195,7 @@ def classify_intent(state: GraphState) -> GraphState:
 
     # Real-LLM path.
     try:
+        # pyrefly: ignore [missing-import]
         from openai import OpenAI  # local import so mock mode never needs it.
         client = OpenAI()
         prompt = build_classifier_prompt(query)
@@ -248,6 +249,7 @@ def retrieve_and_answer(state: GraphState) -> GraphState:
 
     # Real-LLM path: ask for JSON, parse, validate against the schema,
     # retry up to 2 additional times with a corrective instruction.
+    # pyrefly: ignore [missing-import]
     from openai import OpenAI
     client = OpenAI()
     base_prompt = build_policy_prompt(query, chunks)
@@ -318,6 +320,7 @@ def direct_answer(state: GraphState) -> GraphState:
     # Real-LLM path with the same retry+validate pattern. The
     # general-question branch expects an empty sources list, so the
     # validator enforces that explicitly.
+    # pyrefly: ignore [missing-import]
     from openai import OpenAI
     client = OpenAI()
     base_prompt = build_direct_prompt(query)

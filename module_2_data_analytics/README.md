@@ -254,6 +254,23 @@ This project demonstrates:
 
 ---
 
+## 📊 Artifacts & Model Outputs
+
+1. **`titanic.csv`**: Single source of truth dataset extracted via Seaborn and preprocessed for downstream modeling.
+2. **`charts/`**: 10 exported visualization figures covering correlation heatmaps, pairplots, ROC curves, confusion matrices, decision tree diagrams, and regression residual plots.
+3. **`models/best_classifier.joblib`**: Serialized Scikit-learn Random Forest classification pipeline.
+4. **`models/fare_regressor.joblib`**: Serialized Scikit-learn LinearRegression fare regression pipeline.
+
+---
+
+## 🛠️ Troubleshooting & Debugging
+
+- **`ModuleNotFoundError: No module named 'src'` when running tests**: Ensure you execute pytest or unittest commands from inside `module_2_data_analytics` or pass `PYTHONPATH=.` so python can locate the `src` package.
+- **Joblib Numpy Array Shape Deprecation Warnings**: Harmless warning during joblib unpickling on modern NumPy versions. Models load and predict correctly.
+- **REST API HTTP 401 Unauthorized Errors**: Protected endpoints (`/api/profile`, `/api/predict/survival`, `/api/predict/fare`) require an `Authorization: Bearer <token>` header returned from a successful `POST /api/login` response.
+
+---
+
 ## 👨‍💻 Author
 
 **Mundlapudi Muneendra**
@@ -268,3 +285,4 @@ https://github.com/mundlapudimuneendra-ops
 ## 📄 License
 
 This project was developed for educational purposes as part of the Zepto Data Analytics Capstone.
+

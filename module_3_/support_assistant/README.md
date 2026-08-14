@@ -180,3 +180,29 @@ support_assistant/
 - [x] **FastAPI Verification**: Tested `uvicorn main:app --port 7860` with `POST /ask` for policy and general queries.
 - [ ] **Docker Execution**: Skipped (Docker CLI is not installed on the current host machine).
 
+---
+
+## 🛠️ Troubleshooting
+
+- **ChromaDB Indexing Warnings / Telemetry**: `ingest.py` initializes `Settings(anonymized_telemetry=False, allow_reset=False)` to run completely offline without external analytics network requests.
+- **Model Download on First Run**: First run of `ingest.py` or startup auto-indexing downloads `sentence-transformers/all-MiniLM-L6-v2` (~90MB). Subsequent runs use the cached weights in HuggingFace cache.
+- **Real-LLM API Key Missing**: When `MOCK_LLM=0` is enabled, ensure `OPENAI_API_KEY` environment variable is set. If missing or invalid, the pipeline automatically falls back to keyword intent classification and deterministic mock answers to prevent request failure.
+
+---
+
+## 👨‍💻 Author
+
+**Mundlapudi Muneendra**
+
+AI & Machine Learning Student
+
+GitHub:
+https://github.com/mundlapudimuneendra-ops
+
+---
+
+## 📄 License
+
+This project was developed for educational purposes as part of the Zepto Support Assistant Capstone.
+
+

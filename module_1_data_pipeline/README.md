@@ -253,6 +253,22 @@ This project demonstrates:
 
 ---
 
+## 📊 Pipeline Outputs & Verification
+
+1. **`data/raw_books.csv`**: Contains raw scraped fields (`title`, `price`, `star_rating`, `availability`, `category`).
+2. **`data/cleaned_books.csv`**: Cleaned dataset containing 80 rows across 4 categories (Travel, Mystery, Historical Fiction, Classics) with price converted from GBP to INR (conversion multiplier: 105.0) and title deduplication.
+3. **`database/books.db`**: Relational SQLite database with normalized schema (`categories` table linked to `books` table via Foreign Key `category_id`).
+
+---
+
+## 🛠️ Troubleshooting
+
+- **HTTP 429 / Rate Limiting during Web Scraping**: `scraper.py` uses a custom `requests.Session` with a Chrome User-Agent header, automatic 4-attempt exponential backoff retries via `urllib3.util.retry.Retry`, and polite request delays (`0.2s`) to prevent blocking.
+- **Database Duplicate Ingestion**: `database.py` enforces `UNIQUE` constraints on category names and book titles (`INSERT OR IGNORE`) and includes `fresh_database()` helper to maintain idempotency across pipeline runs.
+- **Mojibake Character Decoding**: `cleaner.py` uses explicit Latin-1 to UTF-8 re-encoding (`_fix_mojibake()`) to resolve currency symbol corruption (`Â£` -> `£` / `INR`).
+
+---
+
 ## 👨‍💻 Author
 
 **Mundlapudi Muneendra**
