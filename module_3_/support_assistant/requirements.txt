@@ -1,9 +1,9 @@
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-pydantic==2.9.2
-langgraph==0.2.50
-langchain-core==0.3.0
-chromadb==0.5.5
-sentence-transformers==3.2.1
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.6
+pydantic>=2.9.2
+langgraph>=0.2.50
+langchain-core>=0.3.15
+chromadb>=0.5.5
+sentence-transformers>=3.2.1
 huggingface-hub>=0.24,<1.0
 numpy<3.0

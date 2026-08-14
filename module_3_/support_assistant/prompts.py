@@ -40,13 +40,15 @@ invent fees, time windows, denominations, or any other concrete
 number that is not written in the context.
 
 FORMAT
-- Plain text, no Markdown headings.
-- 1-3 short sentences.
-- Cite the relevant chunk id(s) in parentheses at the end of the
-  answer, e.g. "(doc_01, doc_06)".
+Output MUST be a single valid JSON object with the following exact keys:
+- "answer": string, 1-3 short sentences answering the question grounded in context.
+- "sources": list of string chunk IDs cited (e.g. ["doc_01::chunk0"]).
+- "confidence": float between 0.0 and 1.0 indicating answer confidence.
+
+Do NOT include Markdown fences or extra text outside the JSON object.
 
 LENGTH
-Target 40-90 words. Hard cap 120 words.
+Target 40-90 words for the answer field.
 
 NEGATIVE CONSTRAINTS
 - Do NOT answer using information not present in the provided context.
@@ -56,15 +58,11 @@ NEGATIVE CONSTRAINTS
 
 FEW-SHOT EXAMPLE
 User question: "How long do refunds take?"
-Context excerpt: "Approved refunds are credited to the original
-payment method within 3-5 business days, or instantly to the Zepto
-wallet if the customer opts for wallet credit."
-Ideal answer: "Approved refunds land back on your original payment
-method in 3-5 business days. If you choose Zepto wallet credit, the
-refund is instant. (doc_02)"
+Context excerpt: "[doc_02::chunk0] Approved refunds are credited to the original payment method within 3-5 business days, or instantly to the Zepto wallet if the customer opts for wallet credit."
+Output: {{"answer": "Approved refunds land back on your original payment method in 3-5 business days. If you choose Zepto wallet credit, the refund is instant.", "sources": ["doc_02::chunk0"], "confidence": 1.0}}
 
 User question: {query}
-Your answer:"""
+Output:"""
 
 
 # ---------------------------------------------------------------------------
@@ -86,11 +84,15 @@ Reply briefly, stay in character, and steer the customer back to a
 supported topic. Do not attempt to answer the question itself.
 
 FORMAT
-- Plain text, no Markdown headings.
-- Exactly 1-2 short sentences.
+Output MUST be a single valid JSON object with the following exact keys:
+- "answer": string ("I can only answer questions about Zepto policies right now." or a brief polite refusal steering the user back).
+- "sources": [] (must be an empty list for general questions).
+- "confidence": 1.0 (float).
+
+Do NOT include Markdown fences or extra text outside the JSON object.
 
 LENGTH
-Target 25-50 words. Hard cap 60 words.
+Target 25-50 words for the answer field.
 
 NEGATIVE CONSTRAINTS
 - Do NOT invent Zepto policies, fees, or features that are not in
@@ -100,13 +102,10 @@ NEGATIVE CONSTRAINTS
 
 FEW-SHOT EXAMPLE
 User question: "What's the weather like in Mumbai today?"
-Ideal answer: "I can only help with questions about Zepto's
-delivery, returns, refunds, membership, tracking, cancellation,
-damaged or missing items, gift cards, or support hours. For weather,
-please check a weather service."
+Output: {{"answer": "I can only answer questions about Zepto policies right now.", "sources": [], "confidence": 1.0}}
 
 User question: {query}
-Your answer:"""
+Output:"""
 
 
 # ---------------------------------------------------------------------------

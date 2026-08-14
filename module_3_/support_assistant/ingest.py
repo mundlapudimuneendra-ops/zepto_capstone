@@ -50,7 +50,10 @@ def get_embed_model() -> SentenceTransformer:
 
     global _embed_model
     if _embed_model is None:
-        _embed_model = SentenceTransformer(EMBED_MODEL_NAME)
+        try:
+            _embed_model = SentenceTransformer(EMBED_MODEL_NAME)
+        except Exception:
+            _embed_model = SentenceTransformer(EMBED_MODEL_NAME, local_files_only=True)
     return _embed_model
 
 
@@ -116,11 +119,11 @@ def chunk_document(doc_id: str, text: str) -> List[Tuple[str, str]]:
     """Split a document into chunks.
 
     The corpus docs are short (a single paragraph each), so per-document
-    is a reasonable chunk strategy. The COMPLETE contents of the
-    document are preserved verbatim in the chunk — no first-line /
-    title stripping, no body truncation, no reformatting. Each chunk
-    is tagged with a stable id of the form ``<doc_id>::chunk0``
-    (e.g. ``doc_01::chunk0``).
+    is a reasonable chunk strategy. The COMPLETE contents of each document
+    (doc_01.txt through doc_08.txt) are preserved verbatim in the chunk — no
+    first-line / title stripping, no body truncation, no reformatting. Each
+    chunk is tagged with a stable id of the form `<doc_id>::chunk0`
+    (e.g. `doc_01::chunk0`).
     """
 
     chunk_text = text.strip()

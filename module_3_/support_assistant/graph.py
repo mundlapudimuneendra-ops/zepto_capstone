@@ -64,22 +64,33 @@ def is_mock_mode() -> bool:
     return val.strip().lower() not in ("0", "false", "no", "off")
 
 
-# Kept only for backwards-compat with any external reader; do not
-# branch on this at module import time.
-MOCK_LLM = is_mock_mode()
+# Kept for backwards-compat with any external reader that imports MOCK_LLM.
+# It evaluates dynamically on property/attribute access or when checked via is_mock_mode().
+# DO NOT branch on static import-time values.
 
-
-# Keywords that mark a query as a policy question. Kept lowercase so
-# the check is a single ``in`` against the lowercased query.
 POLICY_KEYWORDS = (
     "delivery",
+    "deliver",
+    "pin code",
+    "rider",
     "return",
     "refund",
     "membership",
+    "pass",
+    "tier",
     "tracking",
+    "track",
     "cancel",
+    "cancellation",
+    "damaged",
+    "missing",
+    "spoiled",
+    "item",
     "gift card",
+    "giftcard",
     "support hours",
+    "support",
+    "hours",
 )
 
 
@@ -153,7 +164,10 @@ def _parse_structured(raw: str) -> dict:
         match = re.search(r"\{.*\}", text, re.DOTALL)
         if match:
             text = match.group(0)
-    return json.loads(text)
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError("Expected JSON object dictionary")
+    return data
 
 
 # ---------------------------------------------------------------------------
@@ -245,14 +259,9 @@ def retrieve_and_answer(state: GraphState) -> GraphState:
             # Corrective instruction — be explicit about the schema.
             prompt = (
                 base_prompt
-                + "\n\nIMPORTANT: Your previous reply was not valid "
-                "JSON or did not match the required schema. Reply with "
-                "ONLY a single JSON object matching this exact shape, "
-                "no prose, no Markdown fences:\n"
-                '{\"answer\": \"<string>\", \"sources\": [\"<chunk id>\", ...], '
-                '\"confidence\": <float between 0 and 1>}\n'
-                "Where 'sources' is the list of retrieved chunk ids "
-                "and 'confidence' is a float in [0, 1]."
+                + "\n\nIMPORTANT: Your previous reply was not valid JSON or did not match the required schema. "
+                "Reply with ONLY a single JSON object matching this exact shape, no prose, no Markdown fences:\n"
+                '{"answer": "<string>", "sources": ["<chunk id>", ...], "confidence": <float between 0 and 1>}'
             )
         try:
             completion = client.chat.completions.create(
@@ -262,12 +271,8 @@ def retrieve_and_answer(state: GraphState) -> GraphState:
             )
             raw = (completion.choices[0].message.content or "").strip()
             parsed = _parse_structured(raw)
-            # Build the response, then validate with Pydantic.
-            resp = SupportResponse(
-                answer=str(parsed.get("answer", "")),
-                sources=list(parsed.get("sources", sources)),
-                confidence=float(parsed.get("confidence", 0.9)),
-            )
+            # Strictly validate structured output with Pydantic SupportResponse model
+            resp = SupportResponse(**parsed)
             return {
                 **state,
                 "retrieved_chunks": chunks,
@@ -286,7 +291,7 @@ def retrieve_and_answer(state: GraphState) -> GraphState:
         **state,
         "retrieved_chunks": chunks,
         "top_chunk_snippet": top_snippet,
-        "answer": "ERROR: failed to generate a valid structured response",
+        "answer": "ERROR: failed to generate a valid structured response after 3 attempts",
         "sources": sources,
         "confidence": 0.0,
         "error": f"{type(last_err).__name__}: {last_err}" if last_err else "unknown",
@@ -323,11 +328,8 @@ def direct_answer(state: GraphState) -> GraphState:
         if attempt > 0:
             prompt = (
                 base_prompt
-                + "\n\nIMPORTANT: Reply with ONLY a single JSON object "
-                "matching this exact shape, no prose, no Markdown fences:\n"
-                '{\"answer\": \"<string>\", \"sources\": [], '
-                '\"confidence\": 1.0}\n'
-                "Sources must be an empty list for general questions."
+                + "\n\nIMPORTANT: Reply with ONLY a single JSON object matching this exact shape, no prose, no Markdown fences:\n"
+                '{"answer": "<string>", "sources": [], "confidence": 1.0}'
             )
         try:
             completion = client.chat.completions.create(
@@ -337,11 +339,7 @@ def direct_answer(state: GraphState) -> GraphState:
             )
             raw = (completion.choices[0].message.content or "").strip()
             parsed = _parse_structured(raw)
-            resp = SupportResponse(
-                answer=str(parsed.get("answer", MOCK_GENERAL_ANSWER)),
-                sources=list(parsed.get("sources", [])),
-                confidence=float(parsed.get("confidence", 1.0)),
-            )
+            resp = SupportResponse(**parsed)
             return {
                 **state,
                 "answer": resp.answer,
@@ -354,7 +352,7 @@ def direct_answer(state: GraphState) -> GraphState:
 
     return {
         **state,
-        "answer": "ERROR: failed to generate a valid structured response",
+        "answer": "ERROR: failed to generate a valid structured response after 3 attempts",
         "sources": [],
         "confidence": 0.0,
         "error": f"{type(last_err).__name__}: {last_err}" if last_err else "unknown",
