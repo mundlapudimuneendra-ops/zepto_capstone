@@ -262,7 +262,7 @@ docker run -p 7860:7860 zepto-support-assistant
 ## 👨‍💻 Author
 
 **Muneendra Mundlapudi**  
-*AI & Machine Learning Specialist*  
+*AI & Machine Learning student*  
 GitHub: [mundlapudimuneendra-ops](https://github.com/mundlapudimuneendra-ops)
 
 ---
